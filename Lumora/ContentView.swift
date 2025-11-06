@@ -7,9 +7,14 @@
 
 import SwiftUI
 
+class JournalEntry {
+
+    
+}
+
 struct ContentView: View {
     
-    let animationSpeed = 2.0
+    let animationSpeed = 3.0
     
     // circle 1 green-ish
     let circle1Color1 = Color(red: 255/255, green: 209/255, blue: 139/255)
@@ -75,14 +80,19 @@ struct ContentView: View {
                     }
                 
             }
-            .blendMode(BlendMode.lighten)
-            .blur(radius: 20)
+            .blendMode(.plusLighter)
+            .blur(radius: 22)
+            
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(backgroundColor)
     }
+    
     
 }
 
 #Preview {
+    
     ContentView()
 }
 
