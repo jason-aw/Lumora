@@ -8,8 +8,13 @@
 import SwiftUI
 
 struct HomeView: View {
+    
     var body: some View {
-        Text("This is the home page")
+        VStack {
+            BlobView()
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(Color("backgroundColor"))
     }
 }
 
