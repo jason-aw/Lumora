@@ -1,5 +1,5 @@
 //
-//  ContentView.swift
+//  CircleView.swift
 //  Lumora
 //
 //  Created by Jason Andersen Winfrey on 7/11/2025.
@@ -7,13 +7,17 @@
 
 import SwiftUI
 
-struct ContentView: View {
+// import mix
+
+struct BlobView: View {
     
     let animationSpeed = 2.0
     
     // circle 1 green-ish
     let circle1Color1 = Color(red: 255/255, green: 209/255, blue: 139/255)
     let circle1Color2 = Color(red: 139/255, green: 255/255, blue: 171/255, opacity: 0.7)
+    
+    
     let circle1Size = 140.0
     @State var circle1OffsetX = 0.0
     @State var circle1OffsetY = 0.0
@@ -29,10 +33,11 @@ struct ContentView: View {
     let circle3Color1 = Color(red: 255/255, green: 230/255, blue: 0/255)
     let circle3Color2 = Color(red: 165/255, green: 0/255, blue: 223/255)
     let circle3Size = 180.0
+    
     @State var circle3OffsetX = 0.0
     @State var circle3OffsetY = 0.0
     
-    let backgroundColor = Color(red: 28/255, green: 28/255, blue: 28/255)
+    // var volume = 0
     
     var body: some View {
         VStack {
@@ -83,6 +88,6 @@ struct ContentView: View {
 }
 
 #Preview {
-    ContentView()
+    BlobView()
 }
 
