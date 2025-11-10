@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Observation
 
 // MARK: - Model
 struct JournalEntry: Identifiable, Hashable {
@@ -89,7 +90,7 @@ struct JournalsView: View {
 
                     VStack(spacing: 20) {
                         ForEach(model.entries) { entry in
-                            JournalCard(
+                            JournalCardView(
                                 entry: entry,
                                 isExpanded: model.isExpanded(entry),
                                 onToggle: { model.toggle(entry) },
@@ -107,93 +108,9 @@ struct JournalsView: View {
             }
         }
     }
-
-    // MARK: - Card
-    @ViewBuilder
-    private func JournalCard(entry: JournalEntry,
-                             isExpanded: Bool,
-                             onToggle: @escaping () -> Void,
-                             onOpen: @escaping () -> Void) -> some View {
-        Button(action: onOpen) {
-            VStack(alignment: .leading, spacing: 10) {
-                HStack(alignment: .top) {
-                    VStack(alignment: .leading, spacing: 6) {
-                        Text(format(date: entry.date))
-                            .font(.system(size: 22, weight: .semibold))
-                            .foregroundColor(.white)
-
-                        Text(entry.snippet)
-                            .font(.system(size: 16, weight: .regular))
-                            .foregroundColor(.white.opacity(0.75))
-                            .lineLimit(isExpanded ? nil : 2)
-                            .multilineTextAlignment(.leading)
-                    }
-
-                    Spacer()
-
-                    // Chevron to toggle expansion without navigating
-                    Button(action: onToggle) {
-                        Image(systemName: "chevron.down")
-                            .font(.system(size: 18, weight: .semibold))
-                            .rotationEffect(.degrees(isExpanded ? 180 : 0))
-                            .foregroundColor(.white.opacity(0.6))
-                            .padding(6)
-                    }
-                    .buttonStyle(.plain)
-                }
-
-                if isExpanded {
-                    Divider().background(Color.white.opacity(0.08))
-                    Text(entry.fullText)
-                        .font(.system(size: 16))
-                        .foregroundColor(.white.opacity(0.8))
-                        .multilineTextAlignment(.leading)
-                        .transition(.opacity.combined(with: .move(edge: .top)))
-                }
-            }
-            .padding(20)
-            .background(
-                RoundedRectangle(cornerRadius: 24, style: .continuous)
-                    .fill(cardBackground)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 24, style: .continuous)
-                            .stroke(cardStroke, lineWidth: 1)
-                    )
-                    .shadow(color: cardShadow, radius: 12, x: 0, y: 8)
-            )
-        }
-        .buttonStyle(.plain)
-    }
-
-    // MARK: - Date formatting
-    private func format(date: Date) -> String {
-        let df = DateFormatter()
-        df.locale = Locale(identifier: "en_GB")
-        df.setLocalizedDateFormatFromTemplate("d MMM yyyy")
-        return df.string(from: date)
-    }
 }
 
-// MARK: - Detail wrapper that feeds the selected entry to your existing view
-private struct JournalTranscriptViewWrapper: View {
-    let entry: JournalEntry
 
-    var body: some View {
-        JournalTranscriptView()
-            .navigationTitle(formattedTitle(entry.date))
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbarBackground(Color("backgroundColor"), for: .navigationBar)
-            .toolbarBackground(.visible, for: .navigationBar)
-            .background(Color("backgroundColor").ignoresSafeArea())
-    }
-
-    private func formattedTitle(_ date: Date) -> String {
-        let df = DateFormatter()
-        df.setLocalizedDateFormatFromTemplate("d MMM yyyy")
-        return df.string(from: date)
-    }
-}
-
-#Preview {
+#Preview("JournalsView") {
     JournalsView()
 }
