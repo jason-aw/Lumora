@@ -54,7 +54,7 @@ struct BlobView: View {
                     .offset(x: circle3OffsetX, y: circle3OffsetY)
                     .opacity(0.67)
                     .onAppear {
-                        withAnimation(.easeInOut(duration: 7).repeatForever().speed( animationSpeed)) {
+                        withAnimation(.easeInOut(duration: 7).repeatForever().speed(animationSpeed)) {
                             circle3OffsetX = .random(in: -150...150)
                             circle3OffsetY = .random(in: -150...150)
                         }
@@ -72,7 +72,7 @@ struct BlobView: View {
                     .offset(x: circle1OffsetX, y: circle1OffsetY)
                     .opacity(0.67)
                     .onAppear {
-                        withAnimation(.easeInOut(duration: 5).repeatForever().speed( animationSpeed)) {
+                        withAnimation(.easeInOut(duration: 5).repeatForever().speed(animationSpeed)) {
                             circle1OffsetX = .random(in: -150...150)
                             circle1OffsetY = .random(in: -150...150)
                         }
@@ -88,7 +88,7 @@ struct BlobView: View {
                     .offset(x: circle2OffsetX, y: circle2OffsetY)
                     .opacity(0.67)
                     .onAppear {
-                        withAnimation(.easeInOut(duration: 3).repeatForever().speed( animationSpeed)) {
+                        withAnimation(.easeInOut(duration: 3).repeatForever().speed(animationSpeed)) {
                             circle2OffsetX = .random(in: -150...150)
                             circle2OffsetY = .random(in: -150...150)
                         }
