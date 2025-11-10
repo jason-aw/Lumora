@@ -6,17 +6,25 @@
 //
 
 import SwiftUI
+import AVFAudio
 
 struct RecordingView: View {
+    @State private var transcriptMic = MicTranscript()
+    
     var body: some View {
-        NavigationStack {
-            Text("This is a journal view")
+        VStack{
+            BlobView(transcriptMic: transcriptMic)
             
-            NavigationLink("Go to next page") {
-                
-                Text("New page")
-                
+            Text(transcriptMic.currSpeech)
+            
+            Button ("Toggle Recording"){
+                if transcriptMic.audioEngine.isRunning{
+                    transcriptMic.stopListening()
+                } else {
+                    transcriptMic.startListening()
+                }
             }
+            .background(.red)
         }
     }
 }
