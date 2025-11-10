@@ -10,11 +10,13 @@ import SwiftUI
 struct HomeView: View {
     
     var body: some View {
-        VStack {
-            BlobView()
+        
+        NavigationStack {
+            NavigationLink(destination: RecordingView()){
+                BlobView(transcriptMic: MicTranscript())
+            }
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Color("backgroundColor"))
+        
     }
 }
 

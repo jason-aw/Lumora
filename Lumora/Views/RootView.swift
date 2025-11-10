@@ -16,7 +16,7 @@ struct RootView: View {
             Tab("Insights", systemImage: "chart.bar.xaxis.ascending") {
                 InsightsView()
             }
-            Tab("Journals", systemImage: "book") {
+            Tab("Journals", systemImage: "book.pages") {
                 JournalsView()
             }
         }
