@@ -12,7 +12,7 @@ struct HomeView: View {
     var body: some View {
         
         NavigationStack {
-            NavigationLink(destination: RecordingView()) {
+            NavigationLink(destination: RecordingView()){
                 FinalBubbleView(volume: .constant(1.0))
             }
         }

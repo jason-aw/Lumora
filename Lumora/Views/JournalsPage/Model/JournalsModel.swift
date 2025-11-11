@@ -44,13 +44,6 @@ final class JournalsViewModel {
 
         entries = [
             make("2025-11-05", snippet: text, full: full),
-            make("2025-11-06", snippet: text, full: full),
-            make("2025-11-07", snippet: text, full: full),
-            make("2025-11-09", snippet: text, full: full),
-            make("2025-11-11", snippet: text, full: full),
-            make("2025-11-12", snippet: text, full: full),
-            make("2025-11-14", snippet: text, full: full),
-            make("2025-11-15", snippet: text, full: full)
         ]
         // Sort newest first if desired; screenshot appears ascending per block, but we can keep descending here
         entries.sort { $0.date > $1.date }
@@ -67,11 +60,16 @@ final class JournalsViewModel {
     func isExpanded(_ entry: JournalEntry) -> Bool {
         expanded.contains(entry.id)
     }
+    
+    func addEntry(snippet: String, full: String){
+        let newEntry = JournalEntry(id: UUID(), date: Date(), snippet: snippet, fullText: full)
+        entries.append(newEntry)
+    }
 }
 
 // MARK: - View
 struct JournalsView: View {
-    @State private var model = JournalsViewModel()
+    @Environment(JournalsViewModel.self) var model
     @State private var path = NavigationPath()
 
     private let cardBackground = Color(.systemGray5).opacity(0.25)
@@ -102,6 +100,7 @@ struct JournalsView: View {
                     .padding(.bottom, 32)
                 }
             }
+            .frame(maxWidth: .infinity)
             .background(Color("backgroundColor").ignoresSafeArea())
             .navigationDestination(for: JournalEntry.self) { entry in
                 JournalTranscriptViewWrapper(entry: entry)

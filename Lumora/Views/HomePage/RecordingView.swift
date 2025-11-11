@@ -10,6 +10,7 @@ import AVFAudio
 
 struct RecordingView: View {
     @State private var transcriptMic = MicTranscript()
+    @Environment(JournalsViewModel.self) var model
     
     var body: some View {
         VStack(spacing: 24) {
@@ -29,9 +30,6 @@ struct RecordingView: View {
             }
             .padding(.horizontal)
             
-            // Speech text
-            Text(transcriptMic.currSpeech)
-                .padding(.top, 8)
             
             // Mic control
             Button ("Toggle Recording") {
@@ -40,6 +38,11 @@ struct RecordingView: View {
                 } else {
                     transcriptMic.startListening()
                 }
+            }
+            .buttonStyle(.borderedProminent)
+            
+            Button("finish recording"){
+                model.addEntry(snippet: "snippet", full: transcriptMic.currSpeech)
             }
             .buttonStyle(.borderedProminent)
         }

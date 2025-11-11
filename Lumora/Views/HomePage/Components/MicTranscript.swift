@@ -8,9 +8,10 @@
 import Foundation
 import AVFoundation
 import Speech
+import Observation
 
 @Observable
-class MicTranscript {
+final class MicTranscript {
     
     var currSpeech: String = "..."
     var currSound: Double = 1
