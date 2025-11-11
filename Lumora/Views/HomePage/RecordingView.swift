@@ -17,11 +17,12 @@ struct RecordingView: View {
     
     @Environment(\.dismiss) private var dismiss
     
+    // MARK: - AI BLOB
     var body: some View {
 
         ZStack{
             BlobView(transcriptMic: transcriptMic)
-            
+
             VStack{
                 Button ("toggle"){
                     if transcriptMic.audioEngine.isRunning{
@@ -33,6 +34,9 @@ struct RecordingView: View {
                 .background(.red)
             }
             
+            
+    // MARK: - TRANSCRIPT PULL UP
+
             VStack{
                 TranscriptPullUp(transcriptMic: transcriptMic)
                     .frame(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height)
@@ -48,12 +52,13 @@ struct RecordingView: View {
                                 }
                             }
                         
+                        
                             .onEnded{ value in
                                 withAnimation(.spring()){
                                     if currentOffset < -150{
-                                        endOffset = -startingOffset * 0.8
+                                        endOffset = -startingOffset * 0.85
                                     }else if endOffset != 0 && currentOffset > 150 {
-                                        endOffset = -30
+                                        endOffset = 0
                                     }
                                     currentOffset = 0
                                 }
@@ -61,8 +66,11 @@ struct RecordingView: View {
                     )
             }
             
+            
+            
         }
         
+    // MARK: - Hidden Navigation Bar
         .toolbar(.hidden, for: .tabBar)
         
     }

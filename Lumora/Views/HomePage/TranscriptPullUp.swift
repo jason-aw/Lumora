@@ -5,29 +5,106 @@
 //  Created by Kenneth Gabriel Libarnes on 10/11/2025.
 //
 
+
 import SwiftUI
+import Foundation
+
+// MARK: - Data Model for transcript
+
+struct AiTurn: Identifiable, Hashable {
+    let id = UUID()
+    let text: String
+    let isUser: Bool
+}
+
+
+// MARK: - Transcript View
 
 struct TranscriptPullUp: View {
     @Bindable var transcriptMic: MicTranscript
     
     var body: some View {
-        VStack{
-            
-            //GRABBER
-            Rectangle()
-                .frame(width: 60, height: 6)
-                .clipShape(RoundedRectangle(cornerRadius: 32))
+        VStack(spacing: 0) {
+            // THE GRABBER
+            RoundedRectangle(cornerRadius: 3)
+                .fill(Color("secondcolor"))
+                .frame(width: 50, height: 6)
                 .padding(.top, 20)
-                .foregroundColor(Color("secondcolor"))
-            Spacer()
-            //
             
-            Text(transcriptMic.currSpeech)
+            // TRANSCRIPT TITLE
+            Text("Transcript")
+                .font(.system(size: 25, weight: .bold, design: .default))
+                .foregroundColor(Color("firstcolor"))
+                .frame(maxWidth: .infinity, alignment: .center)
+                .padding(.horizontal, 24)
+                .padding(.top, 17)
             
+            // TRANSCRIPT CHAT
+            ScrollViewReader { proxy in
+                ScrollView {
+                    //Every new message, the array grows
+                    LazyVStack(alignment: .leading, spacing: 20) {
+                        ForEach(transcriptMic.chat) { turn in
+                            messageRow(for: turn)
+                        }
+            
+                        if transcriptMic.currSpeech != "..." {
+                            messageRow(for: .init(text: transcriptMic.currSpeech, isUser: true))
+                        }
+                    }
+                    .padding(.horizontal, 24)
+                    .padding(.top, 16)
+                    .onChange(of: transcriptMic.chat.count) { _, _ in
+                        if let last = transcriptMic.chat.last {
+                            proxy.scrollTo(last.id, anchor: .bottom)
+                        }
+                    }
+                }
+            }
+            
+            Spacer(minLength: 0)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color("backgroundColor"))
     }
     
+    // MARK: - Transcript Text UI
+    // Returning one row for every transcript message
+    
+    @ViewBuilder
+    private func messageRow(for turn: AiTurn) -> some View {
+        // IF MESSAGE IS FROM THE USER
+        if turn.isUser {
+            HStack {
+                Spacer(minLength: 40)
+                // USER TRANSCRIPT UI TEXT
+                Text(turn.text)
+                    .font(.system(size: 17, weight: .semibold, design: .default))
+                    .foregroundColor(Color("text2"))
+                    .multilineTextAlignment(.trailing)
+                    .frame(maxWidth: 270, alignment: .trailing)
+                    .padding(.vertical, 4)
+            }
+            .id(turn.id)
+        // AI CONVO
+        } else {
+            // AI TRANSCRIPT BAR
+            HStack(alignment: .top, spacing: 12) {
+                Color("text1")
+                    .frame(width: 4)
+                    .cornerRadius(2)
+                    .padding(.vertical, 4)
+                        //distance between text & bar
+                
+                // AI TRANSCRIPT UI TEXT
+                Text(turn.text)
+                    .font(.system(size: 17, weight: .semibold, design: .default))
+                    .foregroundColor(Color("text1"))
+                    .frame(maxWidth: 270, alignment: .leading)
+                    .padding(.vertical, 4)
+            }
+            .id(turn.id)
+        }
+    }
 }
 

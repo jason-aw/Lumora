@@ -12,6 +12,7 @@ import SwiftUI
 struct BlobView: View {
     
     @Bindable var transcriptMic: MicTranscript
+    var dragOffset: CGFloat = 0
     
     let animationSpeed = 5.0
     
@@ -97,8 +98,11 @@ struct BlobView: View {
             }
             .blendMode(BlendMode.lighten)
             .blur(radius: 20)
+            
         }
     }
+    
+
     
 }
 
