@@ -122,8 +122,7 @@ struct JournalsView: View {
             }
         }
     }
-<<<<<<< HEAD:Lumora/Views/JournalsPage/JournalsView.swift
-
+    
     private var header: some View {
         HStack {
             Text("Journal")
@@ -242,12 +241,10 @@ struct JournalsView: View {
 }
 
 #Preview {
-=======
 }
 
 
 #Preview("JournalsView") {
->>>>>>> dd0b2560b390dec1643ba67c1b666cbbb451f233:Lumora/Views/JournalsPage/Model/JournalsModel.swift
     JournalsView()
 }
 

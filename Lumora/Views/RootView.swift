@@ -9,7 +9,6 @@ import SwiftUI
 
 struct RootView: View {
     var body: some View {
-<<<<<<< HEAD
         ZStack {
             // Global background color
             Color("backgroundColor")
@@ -27,29 +26,23 @@ struct RootView: View {
 
             // Main content
             TabView {
-                Tab("Home", systemImage: "house") {
-                    HomeView()
-                }
-                Tab("Insights", systemImage: "chart.bar.xaxis.ascending") {
-                    InsightsView()
-                }
-                Tab("Journals", systemImage: "book") {
-                    JournalsView()
-                }
-=======
-        TabView {
-            Tab("Home", systemImage: "house") {
                 HomeView()
-            }
-            Tab("Insights", systemImage: "chart.bar.xaxis.ascending") {
+                    .tabItem {
+                        Label("Home", systemImage: "house")
+                    }
+
                 InsightsView()
-            }
-            Tab("Journals", systemImage: "book.pages") {
+                    .tabItem {
+                        Label("Insights", systemImage: "chart.bar.xaxis.ascending")
+                    }
+
                 JournalsView()
->>>>>>> dd0b2560b390dec1643ba67c1b666cbbb451f233
+                    .tabItem {
+                        Label("Journals", systemImage: "book")
+                    }
             }
+            .preferredColorScheme(.dark)
         }
-        .preferredColorScheme(.dark)
     }
 }
 
