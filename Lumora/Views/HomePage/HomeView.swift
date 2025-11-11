@@ -13,7 +13,7 @@ struct HomeView: View {
         
         NavigationStack {
             NavigationLink(destination: RecordingView()) {
-                BlobView(volume: .constant(0.5))
+                FinalBubbleView(volume: .constant(1.0))
             }
         }
         

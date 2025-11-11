@@ -57,20 +57,23 @@ class MicTranscript {
         listening = true
         
         let inputNode = audioEngine.inputNode
-        
         let recordingFormat = inputNode.outputFormat(forBus: 0)
         inputNode.removeTap(onBus: 0)
         
-        inputNode.installTap(onBus: 0, bufferSize: 1024, format: recordingFormat, block: { (buffer, when) in
+        inputNode.installTap(onBus: 0, bufferSize: 1024, format: recordingFormat) { buffer, _ in
             self.transcriptRequest.append(buffer)
-            let level = self.getAudioLevel(buffer: buffer)
-            self.currSound = level
+            let rawLevel = self.getAudioLevel(buffer: buffer) // may be outside 0...1
             
-            // Silence detection
-            if level > self.silenceThreshold {
+            // Publish to UI on the main actor so Observation/SwiftUI see every change
+            Task { @MainActor in
+                self.currSound = rawLevel
+            }
+            
+            // Silence detection uses rawLevel; adjust if desired
+            if rawLevel > self.silenceThreshold {
                 self.resetSilenceTimer()
             }
-        })
+        }
         
         audioEngine.prepare()
         try? audioEngine.start()
@@ -102,7 +105,7 @@ class MicTranscript {
     private func resetSilenceTimer() {
         invalidateSilenceTimer()
         silenceTimer = Timer.scheduledTimer(withTimeInterval: silenceDuration, repeats: false) { [weak self] _ in
-            self?.onSilenceDetected()
+//            self?.onSilenceDetected()
         }
     }
     
@@ -119,21 +122,21 @@ class MicTranscript {
     private func finishListeningAndSendToAI() {
         stopListening()
         // Only send to AI if not already loading and have some speech
-        guard true, !loading, !currSpeech.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
-        
-        loading = true
-        Task { @MainActor in
-            let response = await aiChat?.sendChat(userInput: currSpeech) ?? ""
-            self.currSpeech = response
-            self.loading = false
-        }
+//        guard true, !loading, !currSpeech.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
+//        
+//        loading = true
+//        Task { @MainActor in
+//            let response = await aiChat?.sendChat(userInput: currSpeech) ?? ""
+//            self.currSpeech = response
+//            self.loading = false
+//        }
     }
     
     func getAudioLevel(buffer: AVAudioPCMBuffer) -> Double {
         guard let channelData = buffer.floatChannelData else { return 0 }
         let channelDataArray = Array(UnsafeBufferPointer(start: channelData[0], count: Int(buffer.frameLength)))
-        let rms = sqrt(channelDataArray.map {$0 * $0}.reduce(0, +)) / Float(buffer.frameLength) + Float.ulpOfOne
+        let rms = sqrt(channelDataArray.map { $0 * $0 }.reduce(0, +)) / Float(buffer.frameLength) + Float.ulpOfOne
         let level = 20 * log10(rms)
-        return Double(max(level + 100, 0)/10)
+        return Double(max(level + 100, 0) / 100)
     }
 }
