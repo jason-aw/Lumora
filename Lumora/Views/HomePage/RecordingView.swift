@@ -15,6 +15,8 @@ struct RecordingView: View {
     @State private var currentOffset:CGFloat = 0
     @State private var endOffset:CGFloat = 0
     
+    @Environment(\.dismiss) private var dismiss
+    
     var body: some View {
 
         ZStack{
@@ -60,15 +62,8 @@ struct RecordingView: View {
             }
             
         }
-
-        NavigationView { 
-                   Text("Content with hidden navigation bar")
-                       .toolbar(.hidden, for: .navigationBar)
-               }
+        
+        .toolbar(.hidden, for: .tabBar)
         
     }
-}
-
-#Preview {
-
 }
