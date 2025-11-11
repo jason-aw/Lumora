@@ -16,6 +16,7 @@ struct RecordingView: View {
     @State private var endOffset:CGFloat = 0
     
     @Environment(\.dismiss) private var dismiss
+    @Environment(JournalsViewModel.self) var model
     
     // MARK: - AI BLOB
     var body: some View {
@@ -32,6 +33,7 @@ struct RecordingView: View {
                     }
                 }
                 .background(.red)
+                
             }
             
             

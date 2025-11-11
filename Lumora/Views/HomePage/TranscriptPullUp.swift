@@ -22,6 +22,7 @@ struct AiTurn: Identifiable, Hashable {
 
 struct TranscriptPullUp: View {
     @Bindable var transcriptMic: MicTranscript
+    @Environment(JournalsViewModel.self) var model
     
     var body: some View {
         VStack(spacing: 0) {
@@ -38,6 +39,11 @@ struct TranscriptPullUp: View {
                 .frame(maxWidth: .infinity, alignment: .center)
                 .padding(.horizontal, 24)
                 .padding(.top, 17)
+            
+            Button ("add journal entry"){
+                model.addEntry(snippet: "placeholder", full: transcriptMic.chat.map(\.text).joined(separator: "\n"))
+            }
+            .buttonStyle(PlainButtonStyle())
             
             // TRANSCRIPT CHAT
             ScrollViewReader { proxy in
@@ -63,9 +69,15 @@ struct TranscriptPullUp: View {
             }
             
             Spacer(minLength: 0)
+            
+            
+            .background(.red)
+            
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color("backgroundColor"))
+        
+        
     }
     
     // MARK: - Transcript Text UI
