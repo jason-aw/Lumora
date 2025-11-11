@@ -9,12 +9,11 @@ import SwiftUI
 
 struct RootView: View {
     var body: some View {
-<<<<<<< HEAD
         ZStack {
             // Global background color
             Color("backgroundColor")
                 .ignoresSafeArea()
-
+            
             // Prismatic glow behind tabs
             PrismaticBubbleView(
                 size: 320,
@@ -24,8 +23,7 @@ struct RootView: View {
             )
             .allowsHitTesting(false) // keep it non-interactive
             .accessibilityHidden(true)
-
-            // Main content
+            
             TabView {
                 Tab("Home", systemImage: "house") {
                     HomeView()
@@ -33,20 +31,9 @@ struct RootView: View {
                 Tab("Insights", systemImage: "chart.bar.xaxis.ascending") {
                     InsightsView()
                 }
-                Tab("Journals", systemImage: "book") {
+                Tab("Journals", systemImage: "book.pages") {
                     JournalsView()
                 }
-=======
-        TabView {
-            Tab("Home", systemImage: "house") {
-                HomeView()
-            }
-            Tab("Insights", systemImage: "chart.bar.xaxis.ascending") {
-                InsightsView()
-            }
-            Tab("Journals", systemImage: "book.pages") {
-                JournalsView()
->>>>>>> dd0b2560b390dec1643ba67c1b666cbbb451f233
             }
         }
         .preferredColorScheme(.dark)
