@@ -91,7 +91,6 @@ class MicTranscript {
     
     
     func getAudioLevel(buffer: AVAudioPCMBuffer) -> Float {
-       
             guard let channelData = buffer.floatChannelData else { return 0 }
             let channelDataArray = Array(UnsafeBufferPointer(start: channelData[0], count: Int(buffer.frameLength)))
             let rms = sqrt(channelDataArray.map {$0 * $0}.reduce(0, +)) / Float(buffer.frameLength) + Float.ulpOfOne
