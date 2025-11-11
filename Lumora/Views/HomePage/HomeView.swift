@@ -8,13 +8,14 @@
 import SwiftUI
 
 struct HomeView: View {
-    
     var body: some View {
-        VStack {
-            BlobView()
+        ZStack {
+            Color("backgroundColor").ignoresSafeArea()
+            PrismaticBubbleView(size: 260, blur: 16, animationSpeed: 1.2, breatheAmount: 0.035)
+                .allowsHitTesting(false)
+                .accessibilityHidden(true)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Color("backgroundColor"))
     }
 }
 

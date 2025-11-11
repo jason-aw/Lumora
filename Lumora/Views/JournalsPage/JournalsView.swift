@@ -51,7 +51,7 @@ final class JournalsViewModel {
             make("2025-11-14", snippet: text, full: full),
             make("2025-11-15", snippet: text, full: full)
         ]
-        // Sort newest first if desired; screenshot appears ascending per block, but we can keep descending here
+        // Sort newest first
         entries.sort { $0.date > $1.date }
     }
 
@@ -66,26 +66,35 @@ final class JournalsViewModel {
     func isExpanded(_ entry: JournalEntry) -> Bool {
         expanded.contains(entry.id)
     }
+
+    func upsert(_ entry: JournalEntry) {
+        if let idx = entries.firstIndex(where: { $0.id == entry.id }) {
+            entries[idx] = entry
+        } else {
+            entries.insert(entry, at: 0)
+        }
+        entries.sort { $0.date > $1.date }
+    }
 }
 
 // MARK: - View
 struct JournalsView: View {
     @State private var model = JournalsViewModel()
-    @State private var path = NavigationPath()
+
+    // Sheet state
+    @State private var showCompose = false
+    @State private var editingEntry: JournalEntry? = nil
+    @State private var creatingNew = false
 
     private let cardBackground = Color(.systemGray5).opacity(0.25)
     private let cardStroke = Color.white.opacity(0.06)
     private let cardShadow = Color.black.opacity(0.35)
 
     var body: some View {
-        NavigationStack(path: $path) {
+        NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 24) {
-                    Text("Journal")
-                        .font(.system(size: 44, weight: .bold, design: .default))
-                        .foregroundColor(.white)
-                        .padding(.top, 8)
-                        .padding(.horizontal, 24)
+                    header
 
                     VStack(spacing: 20) {
                         ForEach(model.entries) { entry in
@@ -93,7 +102,11 @@ struct JournalsView: View {
                                 entry: entry,
                                 isExpanded: model.isExpanded(entry),
                                 onToggle: { model.toggle(entry) },
-                                onOpen: { path.append(entry) }
+                                onOpen: {
+                                    editingEntry = entry
+                                    creatingNew = false
+                                    showCompose = true
+                                }
                             )
                         }
                     }
@@ -102,9 +115,59 @@ struct JournalsView: View {
                 }
             }
             .background(Color("backgroundColor").ignoresSafeArea())
-            .navigationDestination(for: JournalEntry.self) { entry in
-                JournalTranscriptViewWrapper(entry: entry)
+            .sheet(isPresented: $showCompose) {
+                composeSheetView()
+                    .background(Color("backgroundColor").ignoresSafeArea())
             }
+        }
+    }
+
+    private var header: some View {
+        HStack {
+            Text("Journal")
+                .font(.system(size: 44, weight: .bold, design: .default))
+                .foregroundColor(.white)
+            Spacer()
+            Button {
+                // Create new
+                editingEntry = nil
+                creatingNew = true
+                showCompose = true
+            } label: {
+                Image(systemName: "plus.circle.fill")
+                    .font(.system(size: 26, weight: .semibold))
+                    .foregroundStyle(.white)
+                    .symbolRenderingMode(.hierarchical)
+                    .accessibilityLabel("New Journal")
+            }
+            .buttonStyle(.plain)
+        }
+        .padding(.top, 8)
+        .padding(.horizontal, 24)
+    }
+
+    // MARK: - Compose sheet content
+    @ViewBuilder
+    private func composeSheetView() -> some View {
+        if let entry = editingEntry {
+            // Edit existing
+            JournalComposeView(
+                entry: entry,
+                onSave: { updated in
+                    model.upsert(updated)
+                    showCompose = false
+                },
+                onCancel: { showCompose = false }
+            )
+        } else {
+            // Create new
+            JournalComposeView(
+                onSave: { newEntry in
+                    model.upsert(newEntry)
+                    showCompose = false
+                },
+                onCancel: { showCompose = false }
+            )
         }
     }
 
@@ -138,6 +201,8 @@ struct JournalsView: View {
                             .rotationEffect(.degrees(isExpanded ? 180 : 0))
                             .foregroundColor(.white.opacity(0.6))
                             .padding(6)
+                            .accessibilityLabel(isExpanded ? "Collapse entry" : "Expand entry")
+                            .accessibilityValue(isExpanded ? "Expanded" : "Collapsed")
                     }
                     .buttonStyle(.plain)
                 }
@@ -174,26 +239,7 @@ struct JournalsView: View {
     }
 }
 
-// MARK: - Detail wrapper that feeds the selected entry to your existing view
-private struct JournalTranscriptViewWrapper: View {
-    let entry: JournalEntry
-
-    var body: some View {
-        JournalTranscriptView()
-            .navigationTitle(formattedTitle(entry.date))
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbarBackground(Color("backgroundColor"), for: .navigationBar)
-            .toolbarBackground(.visible, for: .navigationBar)
-            .background(Color("backgroundColor").ignoresSafeArea())
-    }
-
-    private func formattedTitle(_ date: Date) -> String {
-        let df = DateFormatter()
-        df.setLocalizedDateFormatFromTemplate("d MMM yyyy")
-        return df.string(from: date)
-    }
-}
-
 #Preview {
     JournalsView()
 }
+

@@ -9,19 +9,35 @@ import SwiftUI
 
 struct RootView: View {
     var body: some View {
-        TabView {
-            Tab("Home", systemImage: "house") {
-                HomeView()
-            }
-            Tab("Insights", systemImage: "chart.bar.xaxis.ascending") {
-                InsightsView()
-            }
-            Tab("Journals", systemImage: "book") {
-                JournalsView()
+        ZStack {
+            // Global background color
+            Color("backgroundColor")
+                .ignoresSafeArea()
+
+            // Prismatic glow behind tabs
+            PrismaticBubbleView(
+                size: 320,
+                blur: 22,
+                animationSpeed: 1.2,
+                breatheAmount: 0.035
+            )
+            .allowsHitTesting(false) // keep it non-interactive
+            .accessibilityHidden(true)
+
+            // Main content
+            TabView {
+                Tab("Home", systemImage: "house") {
+                    HomeView()
+                }
+                Tab("Insights", systemImage: "chart.bar.xaxis.ascending") {
+                    InsightsView()
+                }
+                Tab("Journals", systemImage: "book") {
+                    JournalsView()
+                }
             }
         }
         .preferredColorScheme(.dark)
-       
     }
 }
 
