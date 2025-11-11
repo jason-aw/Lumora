@@ -16,7 +16,7 @@ class MicTranscript {
     
     var chat: [AiTurn] = [] //array of finished transcripts
     var currSpeech:String = "..."
-    var currSound:Float = 1
+    var currSound:Double = 1
     var listening:Bool = false
     
     // Audio Kit Objects
@@ -25,7 +25,7 @@ class MicTranscript {
     var transcriptRequest:SFSpeechAudioBufferRecognitionRequest!
     var recognitionTask:SFSpeechRecognitionTask!
     
-    init(){
+    init() {
         setupTranscript()
     }
     
@@ -64,7 +64,12 @@ class MicTranscript {
         
         inputNode.installTap(onBus: 0, bufferSize: 1024, format: recordingFormat, block: { (buffer, when) in
             self.transcriptRequest.append(buffer)
-            self.currSound = self.getAudioLevel(buffer: buffer)
+            let rawLevel = self.getAudioLevel(buffer: buffer)
+            
+            // Publish the raw audio level
+            Task { @MainActor in
+                self.currSound = rawLevel
+            }
         })
         
         audioEngine.prepare()
@@ -91,20 +96,16 @@ class MicTranscript {
             }
             
             if error != nil || result?.isFinal == true {
-                self.audioEngine.stop()
-                self.audioEngine.inputNode.removeTap(onBus: 0)
-                self.transcriptRequest = nil
-                self.recognitionTask = nil
+                self.stopListening()
             }
         }
         
     }
     
-    func stopListening(){
+    func stopListening() {
         audioEngine.stop()
         audioEngine.inputNode.removeTap(onBus: 0)
-        transcriptRequest.endAudio()
-        recognitionTask = nil
+        transcriptRequest = nil
         recognitionTask = nil
         listening = false
     }
@@ -119,11 +120,19 @@ class MicTranscript {
             return max(level + 100, 0)/10
       
     }
+
+    /// returns a normalized audio level (0.0 - 1.0) from the given buffer
+    func getAudioLevel(buffer: AVAudioPCMBuffer) -> Double {
+        guard let channelData = buffer.floatChannelData else { return 0 }
+        let channelDataArray = Array(UnsafeBufferPointer(start: channelData[0], count: Int(buffer.frameLength)))
+        let rms = sqrt(channelDataArray.map { $0 * $0 }.reduce(0, +)) / Float(buffer.frameLength) + Float.ulpOfOne
+        let level = 20 * log10(rms)
+        return Double(max(level + 100, 0) / 100)
+    }
     
 }
 
 // MARK: - PLACEHOLDER FOR AI
-
 extension MicTranscript {
     func mockBotReply(to userText: String) {
         let answers = [ "this is a placeholder test response. this is a placeholder test response. this is a placeholder test response. this is a placeholder test response. this is a placeholder test response."]
@@ -135,4 +144,6 @@ extension MicTranscript {
         //Append new AiTurn with isUser: false
     }
 }
+
+
 
