@@ -7,14 +7,11 @@
 
 import SwiftUI
 
-/// A soft, multicolor “glow bubble” that matches the screenshot style:
-/// warm yellow/orange center, magenta/violet lower-left, green upper-left,
-/// cyan/blue upper-right. Animated with subtle drift + breathing.
 struct FinalBubbleView: View {
     // Public knobs
-    var size: CGFloat = 320
-    var blur: CGFloat = 22
-    var animationSpeed: Double = 1.0   // 1.0 = default pace
+    var size: CGFloat = 234
+    var blur: CGFloat = 12
+    var animationSpeed: Double = 12.0
     
     // Volume-driven scale delta (updated from volume)
     @State private var breatheAmount: CGFloat = 0.04
@@ -33,7 +30,7 @@ struct FinalBubbleView: View {
     @State private var l5 = CGSize.zero
     @State private var l6 = CGSize.zero
     
-    // Palette tuned to the screenshot
+    // Palette
     private let warmCoreA = Color(red: 1.00, green: 0.90, blue: 0.55)
     private let warmCoreB = Color(red: 1.00, green: 0.74, blue: 0.32)
     
@@ -191,8 +188,9 @@ struct FinalBubbleView: View {
             }
         }
         .onChange(of: volume) { newValue, _ in
-            let minBreathe: CGFloat = -0.20   // no extra at silence
-            let maxBreathe: CGFloat = 0.50   // up to +30% at loudest
+            // min max breathe params
+            let minBreathe: CGFloat = -0.20
+            let maxBreathe: CGFloat = 0.50
             let clampedVolume = max(0.0, min(1.0, newValue))
             breatheAmount = minBreathe + (maxBreathe - minBreathe) * CGFloat(clampedVolume)
         }

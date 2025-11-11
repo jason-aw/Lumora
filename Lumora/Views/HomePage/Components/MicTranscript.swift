@@ -15,17 +15,10 @@ class MicTranscript {
     var currSpeech: String = "..."
     var currSound: Double = 1
     var listening: Bool = false
-    var loading: Bool = false
     
     var audioEngine: AVAudioEngine!
     var speechRecognizer: SFSpeechRecognizer!
     var transcriptRequest: SFSpeechAudioBufferRecognitionRequest!
-    var silenceTimer: Timer?
-    var aiChat: AIChatViewModel?
-    
-    // Tweak these based on your environment and microphone
-    let silenceThreshold: Double = 1.0
-    let silenceDuration: TimeInterval = 1.0
     
     init() {
         setupTranscript()
@@ -34,14 +27,12 @@ class MicTranscript {
     func setupTranscript() {
         audioEngine = AVAudioEngine()
         speechRecognizer = SFSpeechRecognizer()
-        aiChat = AIChatViewModel()
         
         SFSpeechRecognizer.requestAuthorization { (status) in
             DispatchQueue.main.async {
                 switch status {
                 case .authorized:
                     print("Enabled")
-                    self.aiChat?.startChat()
                 case .denied, .notDetermined, .restricted:
                     print("Not enabled")
                 @unknown default:
@@ -62,16 +53,11 @@ class MicTranscript {
         
         inputNode.installTap(onBus: 0, bufferSize: 1024, format: recordingFormat) { buffer, _ in
             self.transcriptRequest.append(buffer)
-            let rawLevel = self.getAudioLevel(buffer: buffer) // may be outside 0...1
+            let rawLevel = self.getAudioLevel(buffer: buffer)
             
-            // Publish to UI on the main actor so Observation/SwiftUI see every change
+            // Publish the raw audio level
             Task { @MainActor in
                 self.currSound = rawLevel
-            }
-            
-            // Silence detection uses rawLevel; adjust if desired
-            if rawLevel > self.silenceThreshold {
-                self.resetSilenceTimer()
             }
         }
         
@@ -86,12 +72,10 @@ class MicTranscript {
             }
             
             if error != nil || result?.isFinal == true {
-                self.finishListeningAndSendToAI()
+                self.stopListening()
             }
         }
         
-        // Start silence timer when listening starts
-        resetSilenceTimer()
     }
     
     func stopListening() {
@@ -99,39 +83,9 @@ class MicTranscript {
         self.audioEngine.inputNode.removeTap(onBus: 0)
         self.transcriptRequest = nil
         listening = false
-        invalidateSilenceTimer()
     }
     
-    private func resetSilenceTimer() {
-        invalidateSilenceTimer()
-        silenceTimer = Timer.scheduledTimer(withTimeInterval: silenceDuration, repeats: false) { [weak self] _ in
-//            self?.onSilenceDetected()
-        }
-    }
-    
-    private func invalidateSilenceTimer() {
-        silenceTimer?.invalidate()
-        silenceTimer = nil
-    }
-    
-    private func onSilenceDetected() {
-        // Consider the user done talking
-        finishListeningAndSendToAI()
-    }
-    
-    private func finishListeningAndSendToAI() {
-        stopListening()
-        // Only send to AI if not already loading and have some speech
-//        guard true, !loading, !currSpeech.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
-//        
-//        loading = true
-//        Task { @MainActor in
-//            let response = await aiChat?.sendChat(userInput: currSpeech) ?? ""
-//            self.currSpeech = response
-//            self.loading = false
-//        }
-    }
-    
+    /// returns a normalized audio level (0.0 - 1.0) from the given buffer
     func getAudioLevel(buffer: AVAudioPCMBuffer) -> Double {
         guard let channelData = buffer.floatChannelData else { return 0 }
         let channelDataArray = Array(UnsafeBufferPointer(start: channelData[0], count: Int(buffer.frameLength)))
