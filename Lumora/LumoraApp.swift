@@ -7,6 +7,7 @@
 
 import SwiftUI
 import FirebaseCore
+import Observation
 
 class AppDelegate: NSObject, UIApplicationDelegate {
   func application(_ application: UIApplication,
@@ -20,10 +21,14 @@ class AppDelegate: NSObject, UIApplicationDelegate {
 @main
 struct LumoraApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
+    @State private var journalModel = JournalsViewModel()
+    @State private var micTrasncript = MicTranscript()
     
     var body: some Scene {
         WindowGroup {
             RootView()
+                .environment(journalModel)
+                .environment(micTrasncript)
         }
     }
 }

@@ -10,7 +10,14 @@ import AVFAudio
 
 struct RecordingView: View {
     @State private var transcriptMic = MicTranscript()
+    @State private var showTranscript: Bool = true
+    @State private var startingOffset: CGFloat = UIScreen.main.bounds.height * 0.85
+    @State private var currentOffset:CGFloat = 0
+    @State private var endOffset:CGFloat = 0
     
+    @Environment(\.dismiss) private var dismiss
+    @Environment(JournalsViewModel.self) var model
+
     @State private var loading: Bool = false
     @State private var aiResponse: String = ""
     @State private var silenceTask: Task<Void, Never>?
@@ -19,8 +26,8 @@ struct RecordingView: View {
     
     let silenceThreshold: Double = 0.2
     let silenceDuration: TimeInterval = 3.0
-    
-    private func getAIResponse() async {
+
+        private func getAIResponse() async {
         guard self.loading == false else { return }
         let userMessage = transcriptMic.currSpeech.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !userMessage.isEmpty else { return }
@@ -45,45 +52,67 @@ struct RecordingView: View {
         self.silenceTask?.cancel()
         self.silenceTask = nil
     }
-        
     
+    // MARK: - AI BLOB
     var body: some View {
-        VStack(spacing: 24) {
-            // Live value
-            Text(String(format: "Volume: %.2f", transcriptMic.currSound))
-                .font(.system(.body, design: .monospaced))
-                .foregroundStyle(.secondary)
-            
-            // Bubble under test
-            FinalBubbleView(size: 234, blur: 12, animationSpeed: 10.0, volume: $transcriptMic.currSound)
-            
-//            // TEMP: Manual control to simulate volume 0...1
-//            VStack(alignment: .leading, spacing: 8) {
-//                Text("Test Volume")
-//                    .foregroundStyle(.secondary)
-//                Slider(value: $transcriptMic.currSound, in: 0...1)
-//            }
-//            .padding(.horizontal)
-            
-            // Speech text
-            Text(transcriptMic.currSpeech)
-                .padding(.top, 8)
-            
-            Text("AI Response:")
-                .font(.headline)
-                .padding(.top, 16)
-            Text(aiResponse)
-
-            // Mic control
-            Button ("Toggle Recording") {
-                if transcriptMic.audioEngine.isRunning {
-                    transcriptMic.stopListening()
-                } else {
-                    transcriptMic.startListening()
-                }
+        ZStack {
+            VStack(spacing: 24) {
+                // Live value
+                Text(String(format: "Volume: %.2f", transcriptMic.currSound))
+                    .font(.system(.body, design: .monospaced))
+                    .foregroundStyle(.secondary)
+                
+                // Bubble under test
+                FinalBubbleView(size: 234, blur: 12, animationSpeed: 10.0, volume: $transcriptMic.currSound)
+                
+    //            // TEMP: Manual control to simulate volume 0...1
+    //            VStack(alignment: .leading, spacing: 8) {
+    //                Text("Test Volume")
+    //                    .foregroundStyle(.secondary)
+    //                Slider(value: $transcriptMic.currSound, in: 0...1)
+    //            }
+    //            .padding(.horizontal)
+                
+                // Speech text
+                Text(transcriptMic.currSpeech)
+                    .padding(.top, 8)
+                
+                Text("AI Response:")
+                    .font(.headline)
+                    .padding(.top, 16)
+                Text(aiResponse)
             }
-            .buttonStyle(.borderedProminent)
+ 
+            // MARK: - TRANSCRIPT PULL UP
+            VStack {
+                TranscriptPullUp(transcriptMic: transcriptMic)
+                    .frame(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height)
+                    .clipShape(RoundedRectangle(cornerRadius: 32))
+                    .offset(y:startingOffset)
+                    .offset(y:currentOffset)
+                    .offset(y:endOffset)
+                    .gesture(
+                        DragGesture()
+                            .onChanged { value in
+                                withAnimation(.spring()) {
+                                    currentOffset = value.translation.height
+                                }
+                            }
+                            .onEnded { value in
+                                withAnimation(.spring()) {
+                                    if currentOffset < -150 {
+                                        endOffset = -startingOffset * 0.85
+                                    } else if endOffset != 0 && currentOffset > 150 {
+                                        endOffset = 0
+                                    }
+                                    currentOffset = 0
+                                }
+                            }
+                    )
+            }   
         }
+        // MARK: - Hidden Navigation Bar
+        .toolbar(.hidden, for: .tabBar)
         .onAppear {
             aiChat.startChat()
         }
