@@ -12,13 +12,15 @@ struct RecordingView: View {
     @State private var transcriptMic = MicTranscript()
     
     var body: some View {
-        VStack{
-            BlobView(transcriptMic: transcriptMic)
+        VStack {
+            Text(String(transcriptMic.currSound))
+            
+            BlobView(volume: $transcriptMic.currSound)
             
             Text(transcriptMic.currSpeech)
             
-            Button ("Toggle Recording"){
-                if transcriptMic.audioEngine.isRunning{
+            Button ("Toggle Recording") {
+                if transcriptMic.audioEngine.isRunning {
                     transcriptMic.stopListening()
                 } else {
                     transcriptMic.startListening()
@@ -26,9 +28,15 @@ struct RecordingView: View {
             }
             .background(.red)
         }
+        .overlay(
+            Group {
+                if transcriptMic.loading {
+                    ProgressView("Thinking…")
+                        .padding()
+                        .background(.ultraThinMaterial)
+                        .cornerRadius(12)
+                }
+            }
+        )
     }
-}
-
-#Preview {
-    RecordingView()
 }

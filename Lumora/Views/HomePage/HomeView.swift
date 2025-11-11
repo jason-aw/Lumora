@@ -12,8 +12,8 @@ struct HomeView: View {
     var body: some View {
         
         NavigationStack {
-            NavigationLink(destination: RecordingView()){
-                BlobView(transcriptMic: MicTranscript())
+            NavigationLink(destination: RecordingView()) {
+                BlobView(volume: .constant(0.5))
             }
         }
         
