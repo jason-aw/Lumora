@@ -10,52 +10,68 @@ import AVFAudio
 
 struct RecordingView: View {
     @State private var transcriptMic = MicTranscript()
-    @Environment(JournalsViewModel.self) var model
+    @State private var showTranscript: Bool = true
+    @State private var startingOffset: CGFloat = UIScreen.main.bounds.height * 0.85
+    @State private var currentOffset:CGFloat = 0
+    @State private var endOffset:CGFloat = 0
     
+    @Environment(\.dismiss) private var dismiss
+    
+    // MARK: - AI BLOB
     var body: some View {
-        VStack(spacing: 24) {
-            // Live value
-            Text(String(format: "Volume: %.2f", transcriptMic.currSound))
-                .font(.system(.body, design: .monospaced))
-                .foregroundStyle(.secondary)
-            
-            // Bubble under test
-            FinalBubbleView(size: 234, blur: 12, animationSpeed: 10.0, volume: $transcriptMic.currSound)
-            
-            // TEMP: Manual control to simulate volume 0...1
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Test Volume")
-                    .foregroundStyle(.secondary)
-                Slider(value: $transcriptMic.currSound, in: 0...1)
-            }
-            .padding(.horizontal)
-            
-            
-            // Mic control
-            Button ("Toggle Recording") {
-                if transcriptMic.audioEngine.isRunning {
-                    transcriptMic.stopListening()
-                } else {
-                    transcriptMic.startListening()
+
+        ZStack{
+            BlobView(transcriptMic: transcriptMic)
+
+            VStack{
+                Button ("toggle"){
+                    if transcriptMic.audioEngine.isRunning{
+                        transcriptMic.stopListening()
+                    } else {
+                        transcriptMic.startListening()
+                    }
                 }
+                .background(.red)
             }
-            .buttonStyle(.borderedProminent)
             
-            Button("finish recording"){
-                model.addEntry(snippet: "snippet", full: transcriptMic.currSpeech)
+            
+    // MARK: - TRANSCRIPT PULL UP
+
+            VStack{
+                TranscriptPullUp(transcriptMic: transcriptMic)
+                    .frame(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height)
+                    .clipShape(RoundedRectangle(cornerRadius: 32))
+                    .offset(y:startingOffset)
+                    .offset(y:currentOffset)
+                    .offset(y:endOffset)
+                    .gesture(
+                        DragGesture()
+                            .onChanged{ value in
+                                withAnimation(.spring()){
+                                    currentOffset = value.translation.height
+                                }
+                            }
+                        
+                        
+                            .onEnded{ value in
+                                withAnimation(.spring()){
+                                    if currentOffset < -150{
+                                        endOffset = -startingOffset * 0.85
+                                    }else if endOffset != 0 && currentOffset > 150 {
+                                        endOffset = 0
+                                    }
+                                    currentOffset = 0
+                                }
+                            }
+                    )
             }
-            .buttonStyle(.borderedProminent)
+            
+            
+            
         }
-        .padding()
-        .overlay(
-            Group {
-                if transcriptMic.loading {
-                    ProgressView("Thinking…")
-                        .padding()
-                        .background(.ultraThinMaterial)
-                        .cornerRadius(12)
-                }
-            }
-        )
+        
+    // MARK: - Hidden Navigation Bar
+        .toolbar(.hidden, for: .tabBar)
+        
     }
 }
