@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Observation
 
 // MARK: - Model
 struct JournalEntry: Identifiable, Hashable {
@@ -98,7 +99,7 @@ struct JournalsView: View {
 
                     VStack(spacing: 20) {
                         ForEach(model.entries) { entry in
-                            JournalCard(
+                            JournalCardView(
                                 entry: entry,
                                 isExpanded: model.isExpanded(entry),
                                 onToggle: { model.toggle(entry) },
@@ -121,6 +122,7 @@ struct JournalsView: View {
             }
         }
     }
+<<<<<<< HEAD:Lumora/Views/JournalsPage/JournalsView.swift
 
     private var header: some View {
         HStack {
@@ -240,6 +242,12 @@ struct JournalsView: View {
 }
 
 #Preview {
+=======
+}
+
+
+#Preview("JournalsView") {
+>>>>>>> dd0b2560b390dec1643ba67c1b666cbbb451f233:Lumora/Views/JournalsPage/Model/JournalsModel.swift
     JournalsView()
 }
 
