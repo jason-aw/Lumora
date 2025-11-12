@@ -60,8 +60,8 @@ final class JournalsViewModel {
     func isExpanded(_ entry: JournalEntry) -> Bool {
         expanded.contains(entry.id)
     }
-    
-    func addEntry(snippet: String, full: String){
+
+    func addEntry(snippet: String, full: String) {
         let newEntry = JournalEntry(id: UUID(), date: Date(), snippet: snippet, fullText: full)
         entries.append(newEntry)
     }

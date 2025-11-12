@@ -5,33 +5,33 @@
 //  Created by Kenneth Gabriel Libarnes on 10/11/2025.
 //
 
-
 import SwiftUI
 import Foundation
 
 // MARK: - Data Model for transcript
 
-struct AiTurn: Identifiable, Hashable {
+struct ChatLog: Identifiable, Hashable {
     let id = UUID()
     let text: String
     let isUser: Bool
 }
 
-
 // MARK: - Transcript View
 
 struct TranscriptPullUp: View {
+    @Binding var chatLogs: [ChatLog]
     @Bindable var transcriptMic: MicTranscript
     @Environment(JournalsViewModel.self) var model
     
     var body: some View {
         VStack(spacing: 0) {
+            
             // THE GRABBER
             RoundedRectangle(cornerRadius: 3)
                 .fill(Color("secondcolor"))
                 .frame(width: 50, height: 6)
                 .padding(.top, 20)
-            
+
             // TRANSCRIPT TITLE
             Text("Transcript")
                 .font(.system(size: 25, weight: .bold, design: .default))
@@ -41,7 +41,7 @@ struct TranscriptPullUp: View {
                 .padding(.top, 17)
             
             Button ("add journal entry"){
-                model.addEntry(snippet: "placeholder", full: transcriptMic.chat.map(\.text).joined(separator: "\n"))
+                model.addEntry(snippet: "placeholder", full: chatLogs.map(\.text).joined(separator: "\n"))
             }
             .buttonStyle(PlainButtonStyle())
             
@@ -50,7 +50,7 @@ struct TranscriptPullUp: View {
                 ScrollView {
                     //Every new message, the array grows
                     LazyVStack(alignment: .leading, spacing: 20) {
-                        ForEach(transcriptMic.chat) { turn in
+                        ForEach(chatLogs) { turn in
                             messageRow(for: turn)
                         }
             
@@ -60,17 +60,14 @@ struct TranscriptPullUp: View {
                     }
                     .padding(.horizontal, 24)
                     .padding(.top, 16)
-                    .onChange(of: transcriptMic.chat.count) { _, _ in
-                        if let last = transcriptMic.chat.last {
+                    .onChange(of: chatLogs.count) { _, _ in
+                        if let last = chatLogs.last {
                             proxy.scrollTo(last.id, anchor: .bottom)
                         }
                     }
                 }
             }
-            
             Spacer(minLength: 0)
-            
-            
             .background(.red)
             
         }
@@ -84,7 +81,7 @@ struct TranscriptPullUp: View {
     // Returning one row for every transcript message
     
     @ViewBuilder
-    private func messageRow(for turn: AiTurn) -> some View {
+    private func messageRow(for turn: ChatLog) -> some View {
         // IF MESSAGE IS FROM THE USER
         if turn.isUser {
             HStack {
@@ -106,7 +103,6 @@ struct TranscriptPullUp: View {
                     .frame(width: 4)
                     .cornerRadius(2)
                     .padding(.vertical, 4)
-                        //distance between text & bar
                 
                 // AI TRANSCRIPT UI TEXT
                 Text(turn.text)

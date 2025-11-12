@@ -7,6 +7,7 @@
 
 import SwiftUI
 import AVFAudio
+import AVFoundation
 
 struct RecordingView: View {
     @State private var transcriptMic = MicTranscript()
@@ -14,37 +15,78 @@ struct RecordingView: View {
     @State private var startingOffset: CGFloat = UIScreen.main.bounds.height * 0.85
     @State private var currentOffset:CGFloat = 0
     @State private var endOffset:CGFloat = 0
+    @State private var chatLogs: [ChatLog] = []
     
     @Environment(\.dismiss) private var dismiss
     @Environment(JournalsViewModel.self) var model
+//    @Environment(AIChatViewModel.self) var aiChat
+    @State private var aiChat = AIChatViewModel()
+    
+    let synthesizer = AVSpeechSynthesizer()
 
     @State private var loading: Bool = false
     @State private var aiResponse: String = ""
     @State private var silenceTask: Task<Void, Never>?
     
-    private var aiChat:AIChatViewModel = AIChatViewModel()
-    
-    let silenceThreshold: Double = 0.2
-    let silenceDuration: TimeInterval = 3.0
+    let silenceThreshold: Double = 0.25
+    let silenceDuration: TimeInterval = 1.5
 
-        private func getAIResponse() async {
-        guard self.loading == false else { return }
-        let userMessage = transcriptMic.currSpeech.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !userMessage.isEmpty else { return }
-        
-        self.loading = true
+    private func getAIResponse(userMessage: String) async {
+        if self.loading == true {
+            return
+        }
+
+        await MainActor.run { self.loading = true }
+        print("Getting AI response for message: \(userMessage)")
         let response = await aiChat.sendChat(userInput: userMessage)
-        self.aiResponse = response
-        self.loading = false
+        await MainActor.run {
+            self.aiResponse = response
+            self.loading = false
+        }
     }
     
-    private func resetSilenceTask() {
-        self.cancelSilenceTask()
-        
+    private func startSilenceTask() {
+//        print("cancel silence task")
+        guard silenceTask == nil else { return }
+
         self.silenceTask = Task { @MainActor in
-            try? await Task.sleep(nanoseconds: UInt64(silenceDuration * 1_000_000_000))
+            print("Starting silence task")
+            do {
+                try await Task.sleep(nanoseconds: UInt64(silenceDuration * 1_000_000_000))
+                print("Silence duration passed")
+            } catch {
+                print("Silence task cancelled")
+                return
+            }
             
-            await self.getAIResponse()
+
+            let userMessage = transcriptMic.currSpeech.trimmingCharacters(in: .whitespacesAndNewlines)
+            if userMessage.isEmpty {
+                return
+            }
+            let components = userMessage.components(separatedBy: .whitespacesAndNewlines)
+            if components.count <= 3 {
+                return
+            }
+
+            print("Silence detected, processing speech: \(transcriptMic.currSpeech)")
+
+            chatLogs.append(ChatLog(text: transcriptMic.currSpeech, isUser: true))
+            transcriptMic.stopListening()
+            await self.getAIResponse(userMessage: userMessage)
+            
+            await MainActor.run {
+                guard aiResponse != "" else { return }
+                chatLogs.append(ChatLog(text: aiResponse, isUser: false))
+
+                // let AI speak
+                let uttterance = AVSpeechUtterance(string: aiResponse)
+                uttterance.voice = AVSpeechSynthesisVoice(language: "en-US")
+                synthesizer.speak(uttterance)
+            }
+
+            transcriptMic.startListening()
+
         }
     }
     
@@ -64,7 +106,6 @@ struct RecordingView: View {
                 
                 // Bubble under test
                 FinalBubbleView(size: 234, blur: 12, animationSpeed: 10.0, volume: $transcriptMic.currSound)
-                
     //            // TEMP: Manual control to simulate volume 0...1
     //            VStack(alignment: .leading, spacing: 8) {
     //                Text("Test Volume")
@@ -81,11 +122,22 @@ struct RecordingView: View {
                     .font(.headline)
                     .padding(.top, 16)
                 Text(aiResponse)
+                
+                Button("toggle") {
+                    if transcriptMic.listening {
+                        transcriptMic.stopListening()
+                    } else {
+                        transcriptMic.startListening()
+                    }
+                }
+                .padding()
+                .background(.blue)
+
             }
  
             // MARK: - TRANSCRIPT PULL UP
             VStack {
-                TranscriptPullUp(transcriptMic: transcriptMic)
+                TranscriptPullUp(chatLogs: $chatLogs, transcriptMic: transcriptMic)
                     .frame(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height)
                     .clipShape(RoundedRectangle(cornerRadius: 32))
                     .offset(y:startingOffset)
@@ -109,19 +161,23 @@ struct RecordingView: View {
                                 }
                             }
                     )
-            }   
+            }
         }
         // MARK: - Hidden Navigation Bar
         .toolbar(.hidden, for: .tabBar)
         .onAppear {
             aiChat.startChat()
+            transcriptMic.startListening()
         }
-        .onChange(of: transcriptMic.currSound) { newVolume, _ in
+        .onChange(of: transcriptMic.currSound) { newVolume in
             if newVolume > self.silenceThreshold {
-                self.resetSilenceTask()
+                self.cancelSilenceTask()
+            } else {
+                self.startSilenceTask()
             }
         }
         .onDisappear {
+            transcriptMic.stopListening()
             self.cancelSilenceTask()
         }
         .padding()
