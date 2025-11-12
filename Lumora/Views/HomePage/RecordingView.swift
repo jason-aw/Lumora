@@ -21,6 +21,7 @@ struct RecordingView: View {
     @Environment(JournalsViewModel.self) var model
 //    @Environment(AIChatViewModel.self) var aiChat
     @State private var aiChat = AIChatViewModel()
+    @State private var foundationChat = FoundationAIChat()
     
     let synthesizer = AVSpeechSynthesizer()
 
@@ -38,7 +39,8 @@ struct RecordingView: View {
 
         await MainActor.run { self.loading = true }
         print("Getting AI response for message: \(userMessage)")
-        let response = await aiChat.sendChat(userInput: userMessage)
+//        let response = await aiChat.sendChat(userInput: userMessage)
+        let response = await foundationChat.sendChat(userInput: userMessage)
         await MainActor.run {
             self.aiResponse = response
             self.loading = false
@@ -166,7 +168,7 @@ struct RecordingView: View {
         // MARK: - Hidden Navigation Bar
         .toolbar(.hidden, for: .tabBar)
         .onAppear {
-            aiChat.startChat()
+//            aiChat.startChat()
             transcriptMic.startListening()
         }
         .onChange(of: transcriptMic.currSound) { newVolume in
