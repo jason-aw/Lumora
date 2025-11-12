@@ -6,13 +6,14 @@
 //
 
 import Foundation
+import Observation
 
 // MARK: - ViewModel
 @Observable
 final class JournalsViewModel {
     var entries: [JournalEntry] = []
     var expanded: Set<UUID> = []
-    var summaryModel = SummaryModel()
+    var summaryModel: SummaryModel!
 
     init() {
         // Mock data for the last several days to match the screenshot
@@ -25,7 +26,12 @@ final class JournalsViewModel {
                 date: formatter.date(from: iso) ?? Date(),
                 snippet: snippet,
                 fullText: full,
-                chatLogs: [ChatLog(text: "user chat here", isUser: true), ChatLog(text: "AI response here", isUser: false), ChatLog(text: "more user chat", isUser: true), ChatLog(text: "more AI response", isUser: false)]
+                chatLogs: [
+                    ChatLog(text: "user chat here", isUser: true),
+                    ChatLog(text: "AI response here", isUser: false),
+                    ChatLog(text: "more user chat", isUser: true),
+                    ChatLog(text: "more AI response", isUser: false)
+                ]
             )
         }
 
@@ -38,7 +44,6 @@ final class JournalsViewModel {
         entries = [
             make("2025-11-05", snippet: text, full: full),
         ]
-        // Sort newest first if desired; screenshot appears ascending per block, but we can keep descending here
         entries.sort { $0.date > $1.date }
     }
 
@@ -57,12 +62,21 @@ final class JournalsViewModel {
     /// adds a journal entry by summarizing the full text using the summary model
     func addEntry(chatLogs: [ChatLog]) {
         Task {
-            if (summaryModel.chat == nil) {
-                summaryModel.startChat()
+            if summaryModel == nil {
+                summaryModel = SummaryModel()
+            }
+            if summaryModel?.chat == nil {
+                summaryModel?.startChat()
             }
             let full = chatLogs.map(\.text).joined(separator: "\n")
             let snippet = await summaryModel.sendChat(userInput: full)
-            let newEntry = JournalEntry(id: UUID(), date: Date(), snippet: snippet, fullText: full, chatLogs: chatLogs)
+            let newEntry = JournalEntry(
+                id: UUID(),
+                date: Date(),
+                snippet: snippet,
+                fullText: full,
+                chatLogs: chatLogs
+            )
             entries.append(newEntry)
         }
     }
