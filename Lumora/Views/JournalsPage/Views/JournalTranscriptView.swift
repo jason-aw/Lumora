@@ -6,43 +6,55 @@
 //
 import SwiftUI
 
-//
+// MARK: - JOURNAL TRANSCRIPT VIEW
 struct JournalTranscriptView: View {
     let entry: JournalEntry
-
+    
+    private var turns: [AiTurn] {
+        entry.fullText
+            .components(separatedBy: .newlines)
+            .map { AiTurn(text: $0, isUser: false) }
+    }
+    
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 16) {
-                Text(entry.snippet)
-                    .font(.headline)
-                    .foregroundColor(.white)
-
-                Text(entry.fullText)
-                    .foregroundColor(.white.opacity(0.8))
+        ZStack(alignment: .top) {
+            ScrollView {
+                LazyVStack(alignment: .leading, spacing: 8) {
+                    Color.clear.frame(height: 52) // spacing buffer
+                    ForEach(turns) { turn in
+                        TranscriptMessageRow(turn: turn)
+                    }
+                }
+                .padding(.top, 100) //To push the first text below the Transcript title
+                .padding(.horizontal, 24)
             }
-            .padding()
+            .background(Color("backgroundColor"))
+            .ignoresSafeArea()
+            
+            // TRANSCRIPT TITLE
+            VStack(spacing: 0) {
+                Text("Transcript")
+                    .font(.title2.weight(.semibold))
+                    .foregroundColor(.white.opacity(0.8))
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal, 24)
+                    .padding(.vertical, 12)
+            }
+            .background(Color("backgroundColor"))
         }
-        .background(Color("backgroundColor").ignoresSafeArea())
     }
 }
 
-struct JournalTranscriptViewWrapper: View {
+// MARK: - TRANSCRIPT WRAPPER
+struct JournalTranscriptViewWrapper: View {   // ← now a true top-level type
     let entry: JournalEntry
-
+    
     var body: some View {
         JournalTranscriptView(entry: entry)
-            .navigationTitle(formattedTitle(entry.date))
+            .navigationTitle(entry.date.formattedAsJournal())
             .navigationBarTitleDisplayMode(.inline)
             .toolbarBackground(Color("backgroundColor"), for: .navigationBar)
             .toolbarBackground(.visible, for: .navigationBar)
     }
-
-    private func formattedTitle(_ date: Date) -> String {
-        let df = DateFormatter()
-        df.setLocalizedDateFormatFromTemplate("d MMM yyyy")
-        df.locale = Locale(identifier: "en_GB")
-        return df.string(from: date)
-    }
+    
 }
-
-
