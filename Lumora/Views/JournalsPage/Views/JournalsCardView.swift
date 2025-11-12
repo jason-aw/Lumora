@@ -5,9 +5,9 @@
 //  Created by Emily Heng on 10/11/2025.
 //
 
-// MARK: - Card
 import SwiftUI
 
+// MARK: - JOURNAL CARD VIEW
 struct JournalCardView: View {
     let entry: JournalEntry
     let isExpanded: Bool
@@ -22,6 +22,8 @@ struct JournalCardView: View {
     var body: some View {
         Button(action: onOpen) {
             VStack(alignment: .leading, spacing: 10) {
+                
+                //Date, snippet, and expand button TOP
                 HStack(alignment: .top) {
                     VStack(alignment: .leading, spacing: 6) {
                         Text(entry.date.formattedAsJournal())
@@ -37,6 +39,7 @@ struct JournalCardView: View {
 
                     Spacer()
 
+                    //EXPAND and Collaspe
                     Button(action: onToggle) {
                         Image(systemName: "chevron.down")
                             .rotationEffect(.degrees(isExpanded ? 180 : 0))
@@ -45,7 +48,8 @@ struct JournalCardView: View {
                     }
                     .buttonStyle(.plain)
                 }
-
+                
+                // Expanded Section showing full text
                 if isExpanded {
                     Divider().background(Color.white.opacity(0.08))
                     Text(entry.fullText)
@@ -70,23 +74,7 @@ struct JournalCardView: View {
     }
 }
 
-// MARK: - Date formatting
-private func format(date: Date) -> String {
-    let df = DateFormatter()
-    df.locale = Locale(identifier: "en_GB")
-    df.setLocalizedDateFormatFromTemplate("d MMM yyyy")
-    return df.string(from: date)
-    }
 
-
-extension Date {
-    func formattedAsJournal() -> String {
-        let df = DateFormatter()
-        df.locale = Locale(identifier: "en_GB")
-        df.setLocalizedDateFormatFromTemplate("d MMM yyyy")
-        return df.string(from: self)
-    }
-}
 
 
 

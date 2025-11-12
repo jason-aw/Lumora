@@ -8,7 +8,7 @@
 import SwiftUI
 import Observation
 
-// MARK: - Model
+// MARK: - MODEL OF JOURNAL ENTRY
 struct JournalEntry: Identifiable, Hashable {
     let id: UUID
     let date: Date
@@ -16,13 +16,27 @@ struct JournalEntry: Identifiable, Hashable {
     let fullText: String
 }
 
-// MARK: - ViewModel
+
+// MARK: - FORMATTING DATE MODEL
+extension Date {
+    /// Formats a date as used in journal titles and cards (e.g., "7 Nov 2025").
+    func formattedAsJournal() -> String {
+        let df = DateFormatter()
+        df.locale = Locale(identifier: "en_GB")
+        df.setLocalizedDateFormatFromTemplate("d MMM yyyy")
+        return df.string(from: self)
+    }
+}
+
+
+// MARK: - VIEW MODEL
 @Observable
 final class JournalsViewModel {
     var entries: [JournalEntry] = []
     var expanded: Set<UUID> = []
 
     init() {
+        
         // Mock data for the last several days to match the screenshot
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy-MM-dd"
@@ -45,10 +59,12 @@ final class JournalsViewModel {
         entries = [
             make("2025-11-05", snippet: text, full: full),
         ]
-        // Sort newest first if desired; screenshot appears ascending per block, but we can keep descending here
+        
+        // sorted by most recent date
         entries.sort { $0.date > $1.date }
     }
-
+    
+    // Toggle expanded/ collaspe state
     func toggle(_ entry: JournalEntry) {
         if expanded.contains(entry.id) {
             expanded.remove(entry.id)
@@ -57,17 +73,19 @@ final class JournalsViewModel {
         }
     }
 
+    // Check if entry is expanded
     func isExpanded(_ entry: JournalEntry) -> Bool {
         expanded.contains(entry.id)
     }
     
+    // Add a new entry
     func addEntry(snippet: String, full: String){
         let newEntry = JournalEntry(id: UUID(), date: Date(), snippet: snippet, fullText: full)
         entries.append(newEntry)
     }
 }
 
-// MARK: - View
+// MARK: - MAIN VIEW (displaying list of journal cards)
 struct JournalsView: View {
     @Environment(JournalsViewModel.self) var model
     @State private var path = NavigationPath()
@@ -80,12 +98,15 @@ struct JournalsView: View {
         NavigationStack(path: $path) {
             ScrollView {
                 VStack(alignment: .leading, spacing: 24) {
+                    
+                    //PAGE TITLE
                     Text("Journal")
                         .font(.system(size: 44, weight: .bold, design: .default))
                         .foregroundColor(.white)
-                        .padding(.top, 8)
+                        .padding(.top, 15)
                         .padding(.horizontal, 24)
-
+                    
+                    //LIST OF CARDS
                     VStack(spacing: 20) {
                         ForEach(model.entries) { entry in
                             JournalCardView(
@@ -102,6 +123,8 @@ struct JournalsView: View {
             }
             .frame(maxWidth: .infinity)
             .background(Color("backgroundColor").ignoresSafeArea())
+            
+            // NAVIGATION TO TRANSCRIPT VIEW
             .navigationDestination(for: JournalEntry.self) { entry in
                 JournalTranscriptViewWrapper(entry: entry)
             }
@@ -109,7 +132,3 @@ struct JournalsView: View {
     }
 }
 
-
-#Preview("JournalsView") {
-    JournalsView()
-}

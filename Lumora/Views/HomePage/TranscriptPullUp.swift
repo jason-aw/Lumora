@@ -9,14 +9,6 @@
 import SwiftUI
 import Foundation
 
-// MARK: - Data Model for transcript
-
-struct AiTurn: Identifiable, Hashable {
-    let id = UUID()
-    let text: String
-    let isUser: Bool
-}
-
 
 // MARK: - Transcript View
 
@@ -98,6 +90,7 @@ struct TranscriptPullUp: View {
                     .padding(.vertical, 4)
             }
             .id(turn.id)
+            
         // AI CONVO
         } else {
             // AI TRANSCRIPT BAR

@@ -36,11 +36,12 @@ struct InsightsView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 24) {
+                
                 // Title
                 Text("Sleep Insights")
                     .font(.system(size: 44, weight: .bold, design: .default))
                     .foregroundColor(.white)
-                    .padding(.top, 8)
+                    .padding(.top, 15)
                     .padding(.horizontal, 24)
 
                 // Top grid with two cards
@@ -184,6 +185,3 @@ struct InsightsView: View {
     }
 }
 
-#Preview {
-    InsightsView()
-}
