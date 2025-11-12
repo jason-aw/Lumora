@@ -8,70 +8,12 @@
 import SwiftUI
 import Observation
 
-// MARK: - Model
-struct JournalEntry: Identifiable, Hashable {
-    let id: UUID
-    let date: Date
-    let snippet: String
-    let fullText: String
-}
-
 extension Date {
     func formattedAsJournal() -> String {
         let df = DateFormatter()
         df.locale = Locale(identifier: "en_GB")
         df.setLocalizedDateFormatFromTemplate("d MMM yyyy")
         return df.string(from: self)
-    }
-}
-// MARK: - ViewModel
-@Observable
-final class JournalsViewModel {
-    var entries: [JournalEntry] = []
-    var expanded: Set<UUID> = []
-
-    init() {
-        // Mock data for the last several days to match the screenshot
-        let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy-MM-dd"
-
-        func make(_ iso: String, snippet: String, full: String) -> JournalEntry {
-            JournalEntry(
-                id: UUID(),
-                date: formatter.date(from: iso) ?? Date(),
-                snippet: snippet,
-                fullText: full
-            )
-        }
-
-        let text = "You’ve talked about your cat today. He died. You sad."
-        let full = """
-        You’ve talked about your cat today. He died. You sad.
-        This is a longer transcript that would appear when expanded or on the detail page.
-        """
-
-        entries = [
-            make("2025-11-05", snippet: text, full: full),
-        ]
-        // Sort newest first if desired; screenshot appears ascending per block, but we can keep descending here
-        entries.sort { $0.date > $1.date }
-    }
-
-    func toggle(_ entry: JournalEntry) {
-        if expanded.contains(entry.id) {
-            expanded.remove(entry.id)
-        } else {
-            expanded.insert(entry.id)
-        }
-    }
-
-    func isExpanded(_ entry: JournalEntry) -> Bool {
-        expanded.contains(entry.id)
-    }
-
-    func addEntry(snippet: String, full: String) {
-        let newEntry = JournalEntry(id: UUID(), date: Date(), snippet: snippet, fullText: full)
-        entries.append(newEntry)
     }
 }
 

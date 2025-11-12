@@ -8,20 +8,11 @@
 import SwiftUI
 import Foundation
 
-// MARK: - Data Model for transcript
-
-struct ChatLog: Identifiable, Hashable {
-    let id = UUID()
-    let text: String
-    let isUser: Bool
-}
-
 // MARK: - Transcript View
 
 struct TranscriptPullUp: View {
     @Binding var chatLogs: [ChatLog]
     @Bindable var transcriptMic: MicTranscript
-    var summaryModel = SummaryModel()
     @Environment(JournalsViewModel.self) var model
     
     var body: some View {
@@ -41,16 +32,8 @@ struct TranscriptPullUp: View {
                 .padding(.horizontal, 24)
                 .padding(.top, 17)
             
-            Button ("add journal entry"){
-                Task {
-                    if (summaryModel.chat == nil){
-                        summaryModel.startChat()
-                    }
-                    let fullTranscript = chatLogs.map(\.text).joined(separator: "\n")
-                    let snippetText = await summaryModel.sendChat(userInput: fullTranscript)
-                    model.addEntry(snippet: snippetText, full: fullTranscript)
-                }
-                model.addEntry(snippet: "placeholder", full: chatLogs.map(\.text).joined(separator: "\n"))
+            Button ("add journal entry") {
+                model.addEntry(chatLogs: chatLogs)
             }
             .buttonStyle(PlainButtonStyle())
             
@@ -82,8 +65,6 @@ struct TranscriptPullUp: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color("backgroundColor"))
-        
-        
     }
     
     // MARK: - Transcript Text UI

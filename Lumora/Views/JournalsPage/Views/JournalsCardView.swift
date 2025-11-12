@@ -23,7 +23,7 @@ struct JournalCardView: View {
         Button(action: onOpen) {
             VStack(alignment: .leading, spacing: 10) {
                 
-                //Date, snippet, and expand button TOP
+                // Date, snippet, and expand button TOP
                 HStack(alignment: .top) {
                     VStack(alignment: .leading, spacing: 6) {
                         Text(entry.date.formattedAsJournal())
@@ -39,7 +39,7 @@ struct JournalCardView: View {
 
                     Spacer()
 
-                    //EXPAND and Collaspe
+                    // EXPAND and Collaspe
                     Button(action: onToggle) {
                         Image(systemName: "chevron.down")
                             .rotationEffect(.degrees(isExpanded ? 180 : 0))

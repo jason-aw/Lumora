@@ -7,24 +7,17 @@
 
 import SwiftUI
 
-// MARK: - DATA MODEL: AI TURN/ "chat" turn; one turn of dialogue
-struct AiTurn: Identifiable, Hashable {
-    let id = UUID()
-    let text: String
-    let isUser: Bool
-}
-
 // MARK: - UI OF TRANSCRIPT MESSAGE ROW
 struct TranscriptMessageRow: View {
-    let turn: AiTurn
+    let chatLog: ChatLog
     
     var body: some View {
         Group {
-            if turn.isUser {
-                //USER MESSAGE (Right)
+            if chatLog.isUser {
+                // USER MESSAGE (Right)
                 HStack {
                     Spacer(minLength: 40)
-                    Text(turn.text)
+                    Text(chatLog.text)
                         .font(.system(size: 17, weight: .semibold))
                         .foregroundColor(Color("text2"))
                         .multilineTextAlignment(.trailing)
@@ -32,13 +25,13 @@ struct TranscriptMessageRow: View {
                         .padding(.vertical, 4)
                 }
             } else {
-                //AI MESSAGE (left)
+                // AI MESSAGE (left)
                 HStack(alignment: .top, spacing: 12) {
                     Color("text1")
                         .frame(width: 4)
                         .cornerRadius(2)
                         .padding(.vertical, 4)
-                    Text(turn.text)
+                    Text(chatLog.text)
                         .font(.system(size: 17, weight: .semibold))
                         .foregroundColor(Color("text1"))
                         .frame(maxWidth: 270, alignment: .leading)
@@ -46,7 +39,7 @@ struct TranscriptMessageRow: View {
                 }
             }
         }
-        .id(turn.id)
+        .id(chatLog.id)
     }
 }
 

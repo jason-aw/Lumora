@@ -6,23 +6,17 @@
 //
 import SwiftUI
 
-// MARK: - JOURNAL TRANSCRIPT VIEW
+/// JOURNAL TRANSCRIPT VIEW - SHOWS THE CHAT LOGS OF A JOURNAL ENTRY
 struct JournalTranscriptView: View {
     let entry: JournalEntry
-    
-    private var turns: [AiTurn] {
-        entry.fullText
-            .components(separatedBy: .newlines)
-            .map { AiTurn(text: $0, isUser: false) }
-    }
     
     var body: some View {
         ZStack(alignment: .top) {
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: 8) {
                     Color.clear.frame(height: 52) // spacing buffer
-                    ForEach(turns) { turn in
-                        TranscriptMessageRow(turn: turn)
+                    ForEach(entry.chatLogs) { chatLog in
+                        TranscriptMessageRow(chatLog: chatLog)
                     }
                 }
                 .padding(.top, 100) //To push the first text below the Transcript title
