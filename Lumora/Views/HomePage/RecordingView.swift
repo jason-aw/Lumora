@@ -28,7 +28,7 @@ struct RecordingView: View {
     @State private var aiResponse: String = ""
     @State private var silenceTask: Task<Void, Never>?
     
-    let silenceThreshold: Double = 0.25
+    let silenceThreshold: Double = 0.33
     let silenceDuration: TimeInterval = 1.5
 
     private func getAIResponse(userMessage: String) async {

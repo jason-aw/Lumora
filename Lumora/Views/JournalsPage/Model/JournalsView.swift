@@ -16,6 +16,14 @@ struct JournalEntry: Identifiable, Hashable {
     let fullText: String
 }
 
+extension Date {
+    func formattedAsJournal() -> String {
+        let df = DateFormatter()
+        df.locale = Locale(identifier: "en_GB")
+        df.setLocalizedDateFormatFromTemplate("d MMM yyyy")
+        return df.string(from: self)
+    }
+}
 // MARK: - ViewModel
 @Observable
 final class JournalsViewModel {
@@ -109,7 +117,3 @@ struct JournalsView: View {
     }
 }
 
-
-#Preview("JournalsView") {
-    JournalsView()
-}
