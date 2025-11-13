@@ -115,9 +115,9 @@ struct RecordingView: View {
                 // Blob and controls
                 VStack(spacing: 24) {
 
-                    Text(String(format: "Volume: %.2f", transcriptMic.currSound))
-                        .font(.system(.body, design: .monospaced))
-                        .foregroundStyle(.secondary)
+                    //Text(String(format: "Volume: %.2f", transcriptMic.currSound))
+                       // .font(.system(.body, design: .monospaced))
+                        //.foregroundStyle(.secondary)
                     
                     FinalBubbleView(size: 234, blur: 12, animationSpeed: 10.0, volume: $transcriptMic.currSound)
                     
