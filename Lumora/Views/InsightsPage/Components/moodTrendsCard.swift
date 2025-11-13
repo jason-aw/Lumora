@@ -1,0 +1,49 @@
+//
+//  moodTrendsCard.swift
+//  Lumora
+//
+//  Created by Kenneth Gabriel Libarnes on 13/11/2025.
+//
+
+import SwiftUI
+import Foundation
+
+struct moodTrendsCard:  View {
+    private let cardBackground = Color(.systemGray5).opacity(0.25)
+    private let cardStroke = Color.white.opacity(0.06)
+    private let cardShadow = Color.black.opacity(0.35)
+    
+    @Bindable var model: InsightsViewModel
+    
+    var body: some View{
+        RoundedRectangle(cornerRadius: 28, style: .continuous)
+            .fill(cardBackground)
+            .overlay(
+                RoundedRectangle(cornerRadius: 28, style: .continuous)
+                    .stroke(cardStroke, lineWidth: 1)
+            )
+            .shadow(color: cardShadow, radius: 12, x: 0, y: 8)
+            .overlay(
+                VStack(alignment: .leading, spacing: 10) {
+                    HStack(spacing: 10) {
+                        Image(systemName: "face.smiling")
+                            .foregroundColor(.white)
+                            .font(.system(size: 20, weight: .semibold))
+                        Text("Mood Trends")
+                            .foregroundColor(.white)
+                            .font(.system(size: 20, weight: .semibold))
+                        Spacer()
+                    }
+                    
+                    Text(model.moodTrendSummary)
+                        .foregroundColor(.white.opacity(0.75))
+                        .font(.system(size: 16))
+                        .fixedSize(horizontal: false, vertical: true)
+                    
+                    Spacer(minLength: 0)
+                }
+                    .padding(20)
+            )
+            .frame(height: 170)
+    }
+}

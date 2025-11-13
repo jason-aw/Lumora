@@ -69,7 +69,7 @@ final class JournalsViewModel {
                 summaryModel?.startChat()
             }
             let full = chatLogs.map(\.text).joined(separator: "\n")
-            let snippet = await summaryModel.sendChat(userInput: full)
+            let snippet = await summaryModel.sendChat(userInput: "Use option 1: " + full)
             let newEntry = JournalEntry(
                 id: UUID(),
                 date: Date(),

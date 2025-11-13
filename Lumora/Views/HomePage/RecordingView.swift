@@ -35,14 +35,14 @@ struct RecordingView: View {
     let debug = true
     
     private func getAIResponse(userMessage: String) async {
-        if self.loading == true {
-            return
+        if aiChat.chat == nil {
+            aiChat.startChat()
         }
 
         await MainActor.run { self.loading = true }
 //        print("Getting AI response for message: \(userMessage)")
 //        let response = await aiChat.sendChat(userInput: userMessage)
-        let response = await foundationChat.sendChat(userInput: userMessage)
+        let response = await aiChat.sendChat(userInput: userMessage)
         await MainActor.run {
             self.aiResponse = response
             self.loading = false
