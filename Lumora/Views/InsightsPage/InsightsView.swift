@@ -12,7 +12,7 @@ struct InsightsView: View {
     @State private var summaryModel = SummaryModel()
     @Environment(JournalsViewModel.self) var journalModel
     
-  
+    @State private var dragAmount = CGSize.zero
     
     // Match JournalsView card styling for consistency
     private let cardBackground = Color(.systemGray5).opacity(0.25)
@@ -25,28 +25,6 @@ struct InsightsView: View {
     ]
     
     var body: some View {
-        
-        
-        Button("update insights"){
-            Task{
-                if summaryModel.chat == nil {
-                    summaryModel.startChat()
-                }
-                
-                var pastTranscript = ""
-                journalModel.entries.forEach { entry in
-                    pastTranscript += entry.fullText
-                }
-                
-                let moodTrend = await summaryModel.sendChat(userInput: "Use instruction 2: " + pastTranscript)
-                model.moodTrendSummary = moodTrend
-                
-                let bulletPoints = await summaryModel.sendChat(userInput: "Use instruction 3: " + pastTranscript)
-                bulletPoints.split(separator: "*").forEach { point in
-                    model.aiBullets.append(String(point))
-                }
-            }
-        }
         
         ScrollView {
             VStack(alignment: .leading, spacing: 24) {
@@ -70,10 +48,49 @@ struct InsightsView: View {
                     .padding(.horizontal, 16)
                     .padding(.bottom, 32)
             }
+            .offset(dragAmount)
+            .gesture(
+                DragGesture()
+                    .onChanged { gesture in
+                        dragAmount = CGSize(width: 0, height: gesture.translation.height)
+                    }
+                    .onEnded { gesture in
+                        if gesture.translation.height > 100 {
+                            updateInsights()
+                        }
+                        withAnimation{
+                            dragAmount = .zero
+                        }
+                    }
+            )
         }
         .background(Color("backgroundColor").ignoresSafeArea())
+        
+    }
+        
+    func updateInsights(){
+        Task{
+            model.aiBullets = []
+            if summaryModel.chat == nil {
+                summaryModel.startChat()
+            }
+            
+            var pastTranscript = ""
+            journalModel.entries.forEach { entry in
+                pastTranscript += entry.fullText
+            }
+            
+            let moodTrend = await summaryModel.sendChat(userInput: "Use instruction 2: " + pastTranscript)
+            model.moodTrendSummary = moodTrend
+            
+            let bulletPoints = await summaryModel.sendChat(userInput: "Use instruction 3: " + pastTranscript)
+            bulletPoints.split(separator: "*").forEach { point in
+                model.aiBullets.append(String(point))
+            }
+        }
     }
 }
+    
 
     
     

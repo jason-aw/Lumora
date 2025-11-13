@@ -28,10 +28,10 @@ struct moodTrendsCard:  View {
                     HStack(spacing: 10) {
                         Image(systemName: "face.smiling")
                             .foregroundColor(.white)
-                            .font(.system(size: 20, weight: .semibold))
+                            .font(.system(size: 18, weight: .semibold))
                         Text("Mood Trends")
                             .foregroundColor(.white)
-                            .font(.system(size: 20, weight: .semibold))
+                            .font(.system(size: 18, weight: .semibold))
                         Spacer()
                     }
                     
