@@ -32,6 +32,8 @@ struct RecordingView: View {
     let silenceThreshold: Double = 0.33
     let silenceDuration: TimeInterval = 1.5
 
+    let screenHeight = UIScreen.main.bounds.height
+
     let debug = true
     
     private func getAIResponse(userMessage: String) async {
@@ -101,16 +103,18 @@ struct RecordingView: View {
 
     var body: some View {
         GeometryReader { geometry in
+
             // Compute sheet metrics
-            let sheetHeight = geometry.size.height * 0.85
-            let openOffset = geometry.size.height - sheetHeight
-            // Closed shows a grabber area (~120pt) above bottom
-            let closedPeek: CGFloat = geometry.size.height * 0.15
-            let closedOffset = geometry.size.height - closedPeek
+            let sheetHeight = screenHeight * 0.85
+            let openOffset = screenHeight - sheetHeight
+
+            let closedPeek = screenHeight * 0.25
+            let closedOffset = screenHeight - closedPeek
 
             ZStack {
                 // Blob and controls
                 VStack(spacing: 24) {
+
                     Text(String(format: "Volume: %.2f", transcriptMic.currSound))
                         .font(.system(.body, design: .monospaced))
                         .foregroundStyle(.secondary)
@@ -155,6 +159,8 @@ struct RecordingView: View {
                         }
                     }
                 }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+//                .border(.red)
 
                 // TRANSCRIPT PULL UP
                 VStack {
@@ -175,11 +181,11 @@ struct RecordingView: View {
                             // Proposed new resting offset
                             let proposed = sheetOffset + value.translation.height
                             // Snap to nearest state: open or closed
-                            let mid = (closedOffset - openOffset) / 2
+                            let mid = (closedOffset + openOffset) / 2
                             let snapped: CGFloat = (proposed > mid) ? closedOffset - openOffset : 0
                             
                             withAnimation(.spring(response: 0.35, dampingFraction: 0.9)) {
-                                sheetOffset = min(max(snapped, 0), closedOffset - openOffset)
+                                sheetOffset = max(0, snapped)
                                 dragOffset = 0
                             }
                         }
