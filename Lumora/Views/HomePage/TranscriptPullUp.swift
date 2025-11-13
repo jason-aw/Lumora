@@ -32,10 +32,10 @@ struct TranscriptPullUp: View {
                 .padding(.horizontal, 24)
                 .padding(.top, 17)
             
-            Button ("add journal entry") {
-                model.addEntry(chatLogs: chatLogs)
-            }
-            .buttonStyle(PlainButtonStyle())
+            //Button ("add journal entry") {
+                //model.addEntry(chatLogs: chatLogs)
+            //}
+            //.buttonStyle(PlainButtonStyle())
             
             // TRANSCRIPT CHAT
             ScrollViewReader { proxy in

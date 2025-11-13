@@ -84,11 +84,11 @@ struct RecordingView: View {
             await MainActor.run {
                 guard aiResponse != "" else { return }
                 chatLogs.append(ChatLog(text: aiResponse, isUser: false))
-
-                // let AI speak
-                let uttterance = AVSpeechUtterance(string: aiResponse)
-                uttterance.voice = AVSpeechSynthesisVoice(language: "en-US")
-                synthesizer.speak(uttterance)
+            
+                // Let AI speak
+                let utterance = AVSpeechUtterance(string: aiResponse)
+                utterance.voice = AVSpeechSynthesisVoice(language: "en-US")
+                synthesizer.speak(utterance)
             }
 
             transcriptMic.startListening()
