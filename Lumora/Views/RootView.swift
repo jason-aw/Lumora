@@ -9,6 +9,7 @@ import SwiftUI
 
 struct RootView: View {
     var body: some View {
+        
         TabView {
             Tab("Home", systemImage: "house") {
                 HomeView()
@@ -16,7 +17,7 @@ struct RootView: View {
             Tab("Insights", systemImage: "chart.bar.xaxis.ascending") {
                 InsightsView()
             }
-            Tab("Journals", systemImage: "book") {
+            Tab("Journals", systemImage: "book.pages") {
                 JournalsView()
             }
         }

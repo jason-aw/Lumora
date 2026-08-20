@@ -10,14 +10,12 @@ import SwiftUI
 struct HomeView: View {
     
     var body: some View {
-        VStack {
-            BlobView()
+        
+        NavigationStack {
+            NavigationLink(destination: RecordingView()){
+                FinalBubbleView(volume: .constant(1.0))
+            }
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Color("backgroundColor"))
+        
     }
-}
-
-#Preview {
-    HomeView()
 }
